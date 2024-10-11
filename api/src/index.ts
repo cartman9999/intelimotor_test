@@ -1,14 +1,17 @@
 import express, { Request, Response } from 'express'
+import dotenv from 'dotenv'
 import scrapingRoutes from './routes/scrapingRoutes'
 
+dotenv.config()
+
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 
 app.use('/api', scrapingRoutes)
 app.get('/', (req: Request, res: Response) => {
-  res.send('Hwllo World')
+  res.send('Hello World')
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Intelimotor BE app listening on port ${port}`)
 })
