@@ -1,6 +1,12 @@
 import { Request, Response } from 'express'
 import puppeteer, { Browser, Page } from 'puppeteer'
 import path from 'path'
+import { browserManager } from '@services/scraping/puppeteerScrapingService'
+import {
+  authenticateToSite,
+  fillOutVehicleForm,
+} from '@services/scraping/seminuevosScrapingService'
+import { createVehicle } from '@services/vehicles'
 
 const demoPuppeteer = async () => {
   // Launch the browser and open a new blank page
@@ -72,98 +78,8 @@ const demoScreenshot = async () => {
   await browser.close()
 }
 
-const authenticateToSite = async ({ page }: { page: Page }) => {
-  const loginBtn = await page.locator('a.login-btn')
-
-  await Promise.all([
-    loginBtn.click(),
-    page.waitForNavigation({ waitUntil: 'networkidle0' }),
-  ])
-
-  await page.screenshot({
-    path: `ss/login.png`,
-  })
-
-  const emailInput = await page.locator('#email')
-  await emailInput.fill(`${process.env.SEMINUEVOS_USER}`)
-  const passwordInput = await page.locator('#password')
-  await passwordInput.fill(`${process.env.SEMINUEVOS_PASSWORD}`)
-  const submitBtn = await page.locator('button[type="submit"]')
-
-  await page.screenshot({
-    path: `ss/loginForm.png`,
-  })
-
-  await Promise.all([
-    await submitBtn.click(),
-    page.waitForNavigation({ waitUntil: 'networkidle0' }),
-  ])
-
-  await page.screenshot({
-    path: `ss/home.png`,
-  })
-
-  const vendeTuVehiculoBtn = await page.locator('a.btn-primary')
-
-  await Promise.all([
-    await vendeTuVehiculoBtn.click(),
-    page.waitForNavigation({ waitUntil: 'networkidle0' }),
-  ])
-
-  await page.screenshot({
-    path: `ss/vende_tu_vehiculo.png`,
-  })
-}
-
-const browserManager = () => {
-  let browser: Browser | null = null
-
-  return {
-    initializeBrowser: async (): Promise<Browser> => {
-      if (!browser) {
-        browser = await puppeteer.launch({ headless: 'shell' })
-        console.log('Browser initialized')
-      }
-      return browser
-    },
-    setPage: async ({
-      url,
-      width = 1080,
-      height = 1024,
-    }: {
-      url: string
-      width: number
-      height: number
-    }): Promise<Page> => {
-      if (browser) {
-        const page = await browser.newPage()
-        await page.goto(url)
-        await page.setViewport({ width, height })
-        console.log(
-          `Browser page set to ${url} with the following dimentions ${width}x${height}`
-        )
-        return page
-      } else {
-        throw new Error(
-          'Browser is not set. Cannot set a page on an uninitialized browser.'
-        )
-      }
-    },
-    closeBrowser: async (): Promise<void> => {
-      if (browser) {
-        await browser.close()
-        console.log('Browser closed')
-        browser = null
-      } else {
-        throw new Error(
-          'Browser is not initialized. Cannot close an uninitialized browser'
-        )
-      }
-    },
-  }
-}
-
 export const scrapeData = async (req: Request, res: Response) => {
+  const vehicle = createVehicle({ req })
   const { initializeBrowser, setPage, closeBrowser } = browserManager()
   const browser = await initializeBrowser()
   const page = await setPage({
@@ -172,10 +88,11 @@ export const scrapeData = async (req: Request, res: Response) => {
     height: 1000,
   })
   await page.screenshot({
-    path: `ss/seminuevos.png`,
+    path: `ss/00_seminuevos.png`,
   })
 
   await authenticateToSite({ page })
+  await fillOutVehicleForm({ page, vehicle })
   await closeBrowser()
 
   res.send('Inside scrape controller')

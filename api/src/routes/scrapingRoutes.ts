@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express'
-import { scrapeData } from '@controllers/scrapper'
+import { scrapeData } from '@controllers/scraping'
 
 const router = Router()
 
