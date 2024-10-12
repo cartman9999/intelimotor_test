@@ -1,10 +1,12 @@
-import { Page } from 'puppeteer'
+import { ElementHandle, Page } from 'puppeteer'
 import {
   fillVehicleInput,
   selectVehicleDropdownValue,
+  takeAdScreenShot,
 } from '@utils/seminuevosHelperFunctions'
 import { Vehicle } from '@customTypes/Vehicle'
 import { wait } from '@utils/helperFunctions'
+import path from 'path'
 
 export const authenticateToSite = async ({ page }: { page: Page }) => {
   console.log('Authenticating to site...')
@@ -211,6 +213,37 @@ const fillPageOneForm = async ({
   console.log('Formulario pt 2 disponible')
 }
 
+const uploadImages = async ({
+  page,
+  vehicle,
+}: {
+  page: Page
+  vehicle: Vehicle
+}) => {
+  console.log('Esto es process cdw: ', process.cwd())
+  const fileInputSelector = 'input[type="file"]#Uploader'
+
+  // TODO: Reemplazar con rutas guardadas desde request.
+  // Por ahora usando imagenes de prueba
+  const filePaths = [
+    path.relative(process.cwd(), 'public/images/1.jpg'),
+    path.relative(process.cwd(), 'public/images/2.jpg'),
+    path.relative(process.cwd(), 'public/images/3.jpg'),
+  ]
+
+  const fileInput = await page.$(fileInputSelector)
+  if (fileInput) {
+    await fileInput.uploadFile(...filePaths)
+  } else {
+    throw new Error('Could not find input file. Cannot upload vehicle images')
+  }
+
+  await wait(3000)
+  await page.screenshot({
+    path: `ss/018_images_uploaded.png`,
+  })
+}
+
 const fillPageTwoForm = async ({
   page,
   vehicle,
@@ -228,10 +261,18 @@ const fillPageTwoForm = async ({
   await page.screenshot({
     path: `ss/017_description.png`,
   })
+
+  await uploadImages({ page, vehicle })
+  console.log('La URL actual antes de dar click en next:', page.url())
+  await clickNextBtn({ page })
+  await wait(8000) // TODO: buscar cual es el endppoint que se ejecuta cuando se sube imagenes y esperar a que finalice
+  await page.screenshot({
+    path: `ss/019_tier_selection.png`,
+  })
 }
 
 const clickNextBtn = async ({ page }: { page: Page }) => {
-  await page.locator('.next-button').click()
+  await page.locator('.next-button:not(.back)').click()
 }
 
 export const fillOutVehicleForm = async ({
@@ -241,10 +282,12 @@ export const fillOutVehicleForm = async ({
   page: Page
   vehicle: Vehicle
 }) => {
-  console.log('En service, llega vehicle')
-  console.log(vehicle)
-
   await fillPageOneForm({ page, vehicle })
   await wait(1000)
   await fillPageTwoForm({ page, vehicle })
+  const currentUrl = page.url()
+  console.log('La URL actual es:', currentUrl)
+  console.log('Tomando ss')
+  await takeAdScreenShot({ page, url: currentUrl })
+  console.log('SS tomada, fin!!!!')
 }

@@ -1,5 +1,6 @@
 import { Page } from 'puppeteer'
 import { wait } from '@utils/helperFunctions'
+import path from 'path'
 
 export const waitForResponse = async ({
   page,
@@ -60,4 +61,29 @@ export const fillVehicleInput = async ({
   console.log('Llenando: ', selector)
   await page.focus(selector)
   await page.keyboard.type(value)
+}
+
+export const takeAdScreenShot = async ({
+  page,
+  url,
+}: {
+  page: Page
+  url: string
+}) => {
+  const advertisementUrl = url.replace('/plans', '')
+  const advertisementId =
+    advertisementUrl.split('/')[advertisementUrl.split('/').length - 1]
+  await page.goto(advertisementUrl, { waitUntil: 'networkidle0' })
+  await wait(2000)
+  const filePath = path.resolve(
+    __dirname,
+    '..',
+    '..',
+    'generated',
+    'screenshots',
+    `advertisement_${advertisementId}.png`
+  )
+  await page.screenshot({
+    path: filePath,
+  })
 }
