@@ -226,9 +226,9 @@ const uploadImages = async ({
   // TODO: Reemplazar con rutas guardadas desde request.
   // Por ahora usando imagenes de prueba
   const filePaths = [
-    path.relative(process.cwd(), 'public/images/1.jpg'),
-    path.relative(process.cwd(), 'public/images/2.jpg'),
-    path.relative(process.cwd(), 'public/images/3.jpg'),
+    path.relative(process.cwd(), 'public/images/01_acura.jpg'),
+    path.relative(process.cwd(), 'public/images/02_acura.jpg'),
+    path.relative(process.cwd(), 'public/images/03_acura.jpg'),
   ]
 
   const fileInput = await page.$(fileInputSelector)
