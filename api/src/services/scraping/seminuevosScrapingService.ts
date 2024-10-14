@@ -1,12 +1,13 @@
-import { ElementHandle, Page } from 'puppeteer'
+import { Page } from 'puppeteer'
 import {
   fillVehicleInput,
-  selectVehicleDropdownValue,
+  selectVehicleDropdownValues,
   takeAdScreenShot,
+  waitForResponse,
 } from '@utils/seminuevosHelperFunctions'
-import { Vehicle } from '@customTypes/Vehicle'
 import { wait } from '@utils/helperFunctions'
 import path from 'path'
+import { Ad, Vehicle } from '@customTypes/index'
 
 export const authenticateToSite = async ({ page }: { page: Page }) => {
   console.log('Authenticating to site...')
@@ -64,105 +65,54 @@ const fillSelectDropdownFields = async ({
   page: Page
   vehicle: Vehicle
 }) => {
-  await selectVehicleDropdownValue({
+  console.log('Starting dropdown selection...')
+  await selectVehicleDropdownValues({
     page,
-    selector: 'dropdown_types',
-    value: vehicle.type,
-    timeout: 3000,
+    dropdowns: [
+      {
+        selector: 'dropdown_types',
+        value: vehicle.type,
+        timeout: 3000,
+      },
+      {
+        selector: 'dropdown_brands',
+        value: vehicle.brand,
+        endpoint: 'api/v1/catalog_type/1/brand/1/model',
+      },
+      {
+        selector: 'dropdown_models',
+        value: vehicle.model,
+        endpoint: 'api/v1/catalog_type/1/brand/1/model/1002/subtype',
+      },
+      {
+        selector: 'dropdown_subtypes',
+        value: vehicle.subtype,
+      },
+      {
+        selector: 'dropdown_years',
+        value: vehicle.year.toString(),
+      },
+      {
+        selector: 'dropdown_provinces',
+        value: vehicle.province,
+        endpoint: 'api/v1/catalog_city/2',
+      },
+      {
+        selector: 'dropdown_cities',
+        value: vehicle.city,
+      },
+      {
+        selector: 'dropdown_mileageType',
+        value: vehicle.distanceUnit,
+      },
+      {
+        selector: 'dropdown_negotiable',
+        value: vehicle.transactionType,
+      },
+    ],
   })
 
-  await page.screenshot({
-    path: `ss/05_dropdown_types_autos.png`,
-  })
-
-  console.log('Seleccionado tipo: Autos!!!')
-  console.log('Las marcas han sido cargadas. Seleccionando marca...')
-
-  await selectVehicleDropdownValue({
-    page,
-    selector: 'dropdown_brands',
-    value: vehicle.brand,
-    endpoint: 'api/v1/catalog_type/1/brand/1/model',
-  })
-
-  await page.screenshot({
-    path: `ss/06_dropdown_brands_acura.png`,
-  })
-  console.log('Seleccionado Marca: Acura')
-  console.log('Los modelos han sido cargados. Seleccionando modelo...')
-
-  await selectVehicleDropdownValue({
-    page,
-    selector: 'dropdown_models',
-    value: vehicle.model,
-    endpoint: 'api/v1/catalog_type/1/brand/1/model/1002/subtype',
-  })
-
-  await page.screenshot({
-    path: `ss/07_dropdown_models_ilx.png`,
-  })
-
-  await selectVehicleDropdownValue({
-    page,
-    selector: 'dropdown_subtypes',
-    value: vehicle.subtype,
-    // endpoint: 'api/v1/catalog_type/1/brand/1/model/1002/subtype',
-  })
-
-  await page.screenshot({
-    path: `ss/08_dropdown_subtypes.png`,
-  })
-
-  await selectVehicleDropdownValue({
-    page,
-    selector: 'dropdown_years',
-    value: vehicle.year.toString(),
-  })
-
-  await page.screenshot({
-    path: `ss/09_dropdown_years.png`,
-  })
-
-  await selectVehicleDropdownValue({
-    page,
-    selector: 'dropdown_provinces',
-    value: vehicle.province,
-    endpoint: 'api/v1/catalog_city/2',
-  })
-
-  await page.screenshot({
-    path: `ss/010_dropdown_provinces.png`,
-  })
-
-  await selectVehicleDropdownValue({
-    page,
-    selector: 'dropdown_cities',
-    value: vehicle.city,
-  })
-
-  await page.screenshot({
-    path: `ss/011_dropdown_cities.png`,
-  })
-
-  await selectVehicleDropdownValue({
-    page,
-    selector: 'dropdown_mileageType',
-    value: vehicle.distanceUnit,
-  })
-
-  await page.screenshot({
-    path: `ss/012_distance_unit.png`,
-  })
-
-  await selectVehicleDropdownValue({
-    page,
-    selector: 'dropdown_negotiable',
-    value: vehicle.transactionType,
-  })
-
-  await page.screenshot({
-    path: `ss/013_dropdown_negotiable.png`,
-  })
+  console.log('Dropdown selection completed!')
 }
 
 const fillTextInputs = async ({
@@ -177,15 +127,14 @@ const fillTextInputs = async ({
     selector: '#input_recorrido',
     value: vehicle.distanceTraveled.toString(),
   })
-  console.log('Kilometraje lleno!')
 
   await fillVehicleInput({
     page,
     selector: '#input_precio',
     value: vehicle.price.toString(),
   })
-  console.log('Precio lleno!')
 
+  // Remove
   await page.screenshot({
     path: `ss/014_inputs.png`,
   })
@@ -198,19 +147,17 @@ const fillPageOneForm = async ({
   page: Page
   vehicle: Vehicle
 }) => {
-  console.log('Formulario pt 1. Seleccionando valores de dropdowns')
+  console.log('Vehicle form page 1')
   await fillSelectDropdownFields({ page, vehicle })
-  console.log('Formulario pt 1. Valores de dropdowns seleccionados!')
-  console.log('Formulario pt 1. Llenando valores de texto')
   await fillTextInputs({ page, vehicle })
-  console.log('Formulario pt 1. Valores de texto llenos!')
-  console.log('Accediendo a Formulario pt 2')
+  console.log('Vehicle form page 1 completed!')
+  console.log('Vehicle form page 2')
   await clickNextBtn({ page })
   await page.waitForSelector('#input_text_area_review')
   await page.screenshot({
     path: `ss/016_step_2.png`,
   })
-  console.log('Formulario pt 2 disponible')
+  console.log('Vehicle form completed!')
 }
 
 const uploadImages = async ({
@@ -220,28 +167,30 @@ const uploadImages = async ({
   page: Page
   vehicle: Vehicle
 }) => {
-  console.log('Esto es process cdw: ', process.cwd())
+  console.log('Uploading vehicle images...')
   const fileInputSelector = 'input[type="file"]#Uploader'
-
-  // TODO: Reemplazar con rutas guardadas desde request.
-  // Por ahora usando imagenes de prueba
-  const filePaths = [
-    path.relative(process.cwd(), 'public/images/01_acura.jpg'),
-    path.relative(process.cwd(), 'public/images/02_acura.jpg'),
-    path.relative(process.cwd(), 'public/images/03_acura.jpg'),
-  ]
+  const filePaths = vehicle.images.map(image =>
+    path.relative(process.cwd(), image)
+  )
 
   const fileInput = await page.$(fileInputSelector)
   if (fileInput) {
     await fileInput.uploadFile(...filePaths)
+
+    await waitForResponse({
+      page,
+      endpoint: 'api/secure/vehicle/particular/upload-image/',
+    })
+
+    await wait(3000)
+    console.log('Vehicle images uploaded succesfully!')
+    // REMOVE
+    await page.screenshot({
+      path: `ss/018_images_uploaded.png`,
+    })
   } else {
     throw new Error('Could not find input file. Cannot upload vehicle images')
   }
-
-  await wait(3000)
-  await page.screenshot({
-    path: `ss/018_images_uploaded.png`,
-  })
 }
 
 const fillPageTwoForm = async ({
@@ -251,21 +200,24 @@ const fillPageTwoForm = async ({
   page: Page
   vehicle: Vehicle
 }) => {
+  console.log('Setting vehicle description')
   await fillVehicleInput({
     page,
     selector: '#input_text_area_review',
     value: vehicle.description,
   })
-  console.log('Descripcion agregada!')
 
   await page.screenshot({
     path: `ss/017_description.png`,
   })
 
   await uploadImages({ page, vehicle })
-  console.log('La URL actual antes de dar click en next:', page.url())
   await clickNextBtn({ page })
-  await wait(8000) // TODO: buscar cual es el endppoint que se ejecuta cuando se sube imagenes y esperar a que finalice
+  await waitForResponse({
+    page,
+    endpoint: 'api/secure/vehicle/user-publish/publish',
+  })
+  await page.waitForNavigation({ waitUntil: 'networkidle0' })
   await page.screenshot({
     path: `ss/019_tier_selection.png`,
   })
@@ -285,9 +237,14 @@ export const fillOutVehicleForm = async ({
   await fillPageOneForm({ page, vehicle })
   await wait(1000)
   await fillPageTwoForm({ page, vehicle })
-  const currentUrl = page.url()
-  console.log('La URL actual es:', currentUrl)
-  console.log('Tomando ss')
-  await takeAdScreenShot({ page, url: currentUrl })
-  console.log('SS tomada, fin!!!!')
+}
+
+export const generateAdvertisement = async ({
+  page,
+}: {
+  page: Page
+}): Promise<Ad> => {
+  const advertisment = await takeAdScreenShot({ page, url: page.url() })
+  console.log('Ad created!')
+  return advertisment
 }

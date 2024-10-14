@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express'
+import express from 'express'
 import dotenv from 'dotenv'
 import scrapingRoutes from './routes/scrapingRoutes'
 import path from 'path'
@@ -13,10 +13,6 @@ app.use(
   '/ads',
   express.static(path.join(__dirname, '../generated/screenshots'))
 )
-
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World')
-})
 
 app.listen(port, () => {
   console.log(`Intelimotor BE app listening on port ${port}`)

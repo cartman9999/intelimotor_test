@@ -22,7 +22,6 @@ export const browserManager = () => {
     }): Promise<Page> => {
       console.log('Setting page...')
       if (browser) {
-        console.log('Inside if')
         const page = await browser.newPage()
         await page.goto(url)
         await page.setViewport({ width, height })

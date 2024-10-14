@@ -1,12 +1,11 @@
 import { Request } from 'express'
-import { Vehicle } from '@customTypes/Vehicle'
+import { Vehicle } from '@customTypes/index'
 
 export const createVehicle = ({ req }: { req: Request }): Vehicle => {
-  // Create a new function to store the images and set the right values in the array
   const images: Array<string> = [
-    'public/images/1.jpg',
-    'public/images/2.jpg',
-    'public/images/3.jpg',
+    'public/images/01_acura.jpg',
+    'public/images/02_acura.jpg',
+    'public/images/03_acura.jpg',
   ]
 
   return {

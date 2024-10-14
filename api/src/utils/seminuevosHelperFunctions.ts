@@ -1,6 +1,7 @@
 import { Page } from 'puppeteer'
 import { wait } from '@utils/helperFunctions'
 import path from 'path'
+import { Ad, Dropdown } from '@customTypes/index'
 
 export const waitForResponse = async ({
   page,
@@ -20,32 +21,31 @@ export const waitForResponse = async ({
   }
 }
 
-export const selectVehicleDropdownValue = async ({
+export const selectVehicleDropdownValues = async ({
   page,
-  selector,
-  value,
-  endpoint,
-  timeout,
+  dropdowns,
 }: {
   page: Page
-  selector: string
-  value: string
-  endpoint?: string
-  timeout?: number
+  dropdowns: Array<Dropdown>
 }) => {
-  console.log('Value a seleccionar: ', value)
-  await page.waitForSelector(`a[data-activates="${selector}"]`)
-  await page.click(`a[data-activates="${selector}"]`)
+  for (const dropdown of dropdowns) {
+    const { selector, value, endpoint, timeout } = dropdown
 
-  await page.waitForSelector(`#${selector} ul li[data-content="${value}"]`)
-  await page.click(`#${selector} ul li[data-content="${value}"] a`)
+    console.log(`Selecting dropdown: ${selector}, value: ${value}`)
 
-  if (endpoint) {
-    await waitForResponse({ page, endpoint })
-  }
+    await page.waitForSelector(`a[data-activates="${selector}"]`)
+    await page.click(`a[data-activates="${selector}"]`)
 
-  if (timeout) {
-    await wait(timeout)
+    await page.waitForSelector(`#${selector} ul li[data-content="${value}"]`)
+    await page.click(`#${selector} ul li[data-content="${value}"] a`)
+
+    if (endpoint) {
+      await waitForResponse({ page, endpoint })
+    }
+
+    if (timeout) {
+      await wait(timeout)
+    }
   }
 }
 
@@ -58,7 +58,7 @@ export const fillVehicleInput = async ({
   selector: string
   value: string
 }) => {
-  console.log('Llenando: ', selector)
+  console.log('Filling Text input: ', selector)
   await page.focus(selector)
   await page.keyboard.type(value)
 }
@@ -69,21 +69,27 @@ export const takeAdScreenShot = async ({
 }: {
   page: Page
   url: string
-}) => {
+}): Promise<Ad> => {
   const advertisementUrl = url.replace('/plans', '')
   const advertisementId =
     advertisementUrl.split('/')[advertisementUrl.split('/').length - 1]
   await page.goto(advertisementUrl, { waitUntil: 'networkidle0' })
   await wait(2000)
+  const ssName = `advertisement_${advertisementId}.png`
   const filePath = path.resolve(
     __dirname,
     '..',
     '..',
     'generated',
     'screenshots',
-    `advertisement_${advertisementId}.png`
+    ssName
   )
   await page.screenshot({
     path: filePath,
   })
+
+  return {
+    advertisementId,
+    ssName,
+  }
 }
