@@ -33,10 +33,11 @@
     "typescript-eslint": "^8.8.1"
   },
   "dependencies": {
+    "@types/puppeteer": "^5.4.7",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "module-alias": "^2.2.3",
-    "puppeteer": "^23.5.1",
+    "puppeteer": "^23.5.3",
     "tsconfig-paths": "^4.2.0"
   }
 }
