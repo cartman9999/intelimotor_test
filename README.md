@@ -18,3 +18,5 @@ Para satisfacer los requisitos de la prueba el proyecto se divide en dos carpeta
 ## Configuración del ambiente
 
 Para obtener los detalles de la configuración, dentro de las carpetas `api` y `web` se ha generado un `README.md` con las instrucciones especificas para cada app.
+
+Una vez que ambas aplicaciones estén activas, se puede realizar la prueba desde el navegador.
