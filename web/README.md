@@ -12,6 +12,7 @@ Para satisfacer las necesidades del proyecto y con la finalidad de hacer un proy
 
 - `src` -> Contiene los archivos .tsx que conforman la aplicación
   - `components` -> Contiene los componentes de la aplicación
+  - `hooks` -> Contiene los custom hooks de la aplicación
   - `App.tsx` -> Es el entrypoint a la aplicación, contiene la definición de rutas de React Router, así como el árbol de componentes de la aplicación.
 - `public` -> Contiene el favicon de la aplicación.
 

@@ -1,27 +1,17 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import {
   FormContainer,
   FormHeader,
-  StyledBackdrop,
   StyledTextField,
-  LoaderMessage,
   SubmitButton,
   InputContainer,
   FlexWrapBox,
   PageHeader,
 } from './FormPage.styled'
-import { useEnv } from '../../../context/EnvContext'
+import ErrorModal from './ErrorModal'
+import Loader from './Loader'
+import useSubmitForm from '../../../hooks/Form/useSubmitForm'
 
 interface Errors {
   inputPrecio?: string
@@ -29,79 +19,25 @@ interface Errors {
 }
 
 const FormPage = () => {
-  const { apiUrl } = useEnv()
   const [inputPrecio, setInputPrecio] = useState('')
   const [inputDescription, setInputDescription] = useState('')
   const [errors, setErrors] = useState<Errors>({})
-  const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false)
-  const navigate = useNavigate()
-
-  const validateForm = async () => {
-    const newErrors: Errors = {}
-
-    if (!inputPrecio) {
-      newErrors.inputPrecio = 'Este campo es requerido'
-    }
-
-    if (!inputDescription) {
-      newErrors.inputDescription = 'Este campo es requerido'
-    }
-
-    setErrors(newErrors)
-    return newErrors
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    const errors = await validateForm()
-    if (JSON.stringify(errors) === '{}') {
-      setLoading(true)
-      try {
-        const api = `${apiUrl}/api/scrape`
-        const response = await fetch(api, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ inputPrecio, inputDescription }),
-        })
-
-        setLoading(false)
-
-        if (response.ok) {
-          const data = await response.json()
-          const { advertisementId, imageUrl } = data
-          const queryParams = new URLSearchParams({ imageUrl }).toString()
-          navigate(`/ad/${advertisementId}?${queryParams}`)
-        } else {
-          const errorData = await response.json()
-          setErrorMessage(
-            `${errorData.error} \n Intentelo nuevamente.` ||
-              'Hubo un error en el servidor. Intentelo nuevamente.'
-          )
-          setIsErrorModalOpen(true)
-        }
-      } catch (error) {
-        setLoading(false)
-        setErrorMessage('Error en la solicitud: ' + (error as Error).message)
-        setIsErrorModalOpen(true)
-      }
-    }
-  }
-
-  const handleCloseErrorModal = () => {
-    setIsErrorModalOpen(false)
-  }
+  const {
+    loading,
+    errorMessage,
+    isErrorModalOpen,
+    handleSubmit,
+    handleCloseErrorModal,
+  } = useSubmitForm()
 
   return (
     <>
       <PageHeader variant="h4">¡Publica tu vehículo ahora!</PageHeader>
       <Box
         component="form"
-        onSubmit={handleSubmit}
+        onSubmit={(e) =>
+          handleSubmit(e, inputPrecio, inputDescription, setErrors)
+        }
         sx={{ '& .MuiTextField-root': { m: 1 } }}
       >
         <FormContainer>
@@ -230,25 +166,15 @@ const FormPage = () => {
         </SubmitButton>
       </Box>
 
-      <StyledBackdrop open={loading}>
-        <LoaderMessage variant="h6">
-          {' '}
-          Publicando anuncio, espera un poco...
-        </LoaderMessage>
-        <CircularProgress color="inherit" />
-      </StyledBackdrop>
-
-      <Dialog open={isErrorModalOpen} onClose={handleCloseErrorModal}>
-        <DialogTitle>Error</DialogTitle>
-        <DialogContent>
-          <Typography>{errorMessage}</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseErrorModal} color="primary">
-            Cerrar
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Loader
+        loading={loading}
+        message="Publicando anuncio, espera un poco..."
+      />
+      <ErrorModal
+        isOpen={isErrorModalOpen}
+        errorMessage={errorMessage}
+        onClose={handleCloseErrorModal}
+      />
     </>
   )
 }
