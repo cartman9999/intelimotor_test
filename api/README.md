@@ -13,7 +13,7 @@ Para satisfacer las necesidades del proyecto y con la finalidad de hacer un proy
 - `src` -> Tiene todo el código del BE
   - `controllers` -> Encargado de mantener los controladores de la aplicación
   - `routes` -> Contiene las rutas del proyecto
-  - `services` -> Contiene la lógica del negocio, asegurando que los controladores no se saturan
+  - `services` -> Contiene la lógica del negocio
   - `utils` -> Contiene funciones o módulos reutilizables
   - `index.ts` -> Es el entrypoint a la aplicación, contiene el servidor de Express.
 - `generated` -> Contiene archivos generados, en este caso se empleó para almacenar las capturas de pantalla generadas tras publicar el anuncio.

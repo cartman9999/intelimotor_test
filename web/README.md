@@ -1,50 +1,67 @@
-# React + TypeScript + Vite
+# BE - Prueba Técnica Intelimotor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Desarrollada por Eric Montes de Oca Juárez**
 
-Currently, two official plugins are available:
+## Descripción
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Esta carpeta `web` es la encargada de generar una aplicación FE, que debe ser construida usando React, Material UI y debe consumir al API del BE, el resultado de la ejecución es que la captura de pantalla del anuncio generado debe ser visible para el usuario.
 
-## Expanding the ESLint configuration
+## Estructura del proyecto
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+Para satisfacer las necesidades del proyecto y con la finalidad de hacer un proyecto lo más escalable posible a futuro, así cómo respetar buenas prácticas la estructura del proyecto quedó definida de la siguiente manera:
 
-- Configure the top-level `parserOptions` property like this:
+- `src` -> Contiene los archivos .tsx que conforman la aplicación
+  - `components` -> Contiene los componentes de la aplicación
+  - `App.tsx` -> Es el entrypoint a la aplicación, contiene la definición de rutas de React Router, así como el árbol de componentes de la aplicación.
+- `public` -> Contiene el favicon de la aplicación.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Dependencias
+
+El proyecto hace uso de los siguientes paquetes:
+
+- React.js
+- React Router
+- Vite
+- TypeScript
+- Eslint
+- Prettier
+
+Para instalar los paquetes usar el siguiente comando:
+
+```
+npm install
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Configuración del ambiente
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+Para configurar la aplicación es necesario crear un archivo `.env`. Las variables necesarias para iniciar el proyecto se pueden copiar del archivo `.env.example`
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
 ```
+VITE_API_URL= Añadir la URL de la API incluyendo puerto, ejemplo: http://localhost:3000
+```
+
+`VITE_API_URL` hace referencia a la URL del servidor, debe incluir el número de puerto.
+
+## Iniciar app
+
+Para iniciar la app, es necesario ejecutar el siguiente comando desde la carpeta `/api`:
+
+```
+npm run start
+```
+
+## Publicar anuncio en seminuevos.com
+
+Para publicar un anuncio de vehículo en `seminuevos.com`
+hay que entrar a la ruta `/`.
+
+Los datos requeridos para poder enviar la solicitud al backend son:
+
+- Precio: number
+- Descripción: string
+
+Una vez que se hace submit al formulario, se podrá observar un loader que indica al usuarios que el anuncio se está publicando.
+
+Si todo sale bien, habrá una redirección a `/ad/:advertisementID` donde podremos ver la captura de pantalla del anuncio generado.
+
+En caso de fallo, aparecerá un modal indicando el error que ha ocurrido en el BE. Al cerrar el modal podemos volver a intentar publicar un nuevo anuncio.
