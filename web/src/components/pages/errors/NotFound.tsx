@@ -1,11 +1,12 @@
-export const NotFound = () => {
-  console.log('404!!!')
+import { Box } from '@mui/material'
+
+const NotFound = () => {
   return (
-    <>
+    <Box style={{ backgroundColor: 'white' }}>
       <h1>404</h1>
-      <h2>
-        P<span>&#126;</span>agina no encontrada
-      </h2>
-    </>
+      <h2>P&aacute;gina no encontrada</h2>
+    </Box>
   )
 }
+
+export default NotFound
