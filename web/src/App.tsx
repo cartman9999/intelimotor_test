@@ -24,7 +24,7 @@ export const App = () => {
           <Routes>
             <Route path="/" element={<FormPage />} />
             <Route path="/ad/:advertisementID" element={<AdPage />} />
-            {/* <Route path="/*" element={<NotFound />} /> */}
+            <Route path="/*" element={<NotFound />} />
           </Routes>
         </Container>
       </Router>
