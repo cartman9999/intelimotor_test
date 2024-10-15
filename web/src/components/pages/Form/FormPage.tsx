@@ -1,6 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, CircularProgress, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
+} from '@mui/material'
 import {
   FormContainer,
   FormHeader,
@@ -25,6 +34,8 @@ const FormPage = () => {
   const [inputDescription, setInputDescription] = useState('')
   const [errors, setErrors] = useState<Errors>({})
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false)
   const navigate = useNavigate()
 
   const validateForm = async () => {
@@ -48,24 +59,41 @@ const FormPage = () => {
     const errors = await validateForm()
     if (JSON.stringify(errors) === '{}') {
       setLoading(true)
-      const api = `${apiUrl}/api/scrape`
-      const response = await fetch(api, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ inputPrecio, inputDescription }),
-      })
+      try {
+        const api = `${apiUrl}/api/scrape`
+        const response = await fetch(api, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ inputPrecio, inputDescription }),
+        })
 
-      setLoading(false)
+        setLoading(false)
 
-      if (response.ok) {
-        const data = await response.json()
-        const { advertisementId, imageUrl } = data
-        const queryParams = new URLSearchParams({ imageUrl }).toString()
-        navigate(`/ad/${advertisementId}?${queryParams}`)
+        if (response.ok) {
+          const data = await response.json()
+          const { advertisementId, imageUrl } = data
+          const queryParams = new URLSearchParams({ imageUrl }).toString()
+          navigate(`/ad/${advertisementId}?${queryParams}`)
+        } else {
+          const errorData = await response.json()
+          setErrorMessage(
+            `${errorData.error} \n Intentelo nuevamente.` ||
+              'Hubo un error en el servidor. Intentelo nuevamente.'
+          )
+          setIsErrorModalOpen(true)
+        }
+      } catch (error) {
+        setLoading(false)
+        setErrorMessage('Error en la solicitud: ' + (error as Error).message)
+        setIsErrorModalOpen(true)
       }
     }
+  }
+
+  const handleCloseErrorModal = () => {
+    setIsErrorModalOpen(false)
   }
 
   return (
@@ -171,6 +199,7 @@ const FormPage = () => {
                 helperText={errors.inputPrecio}
                 fullWidth
                 required
+                autoComplete="off"
               />
             </FlexWrapBox>
             <Box>
@@ -185,6 +214,7 @@ const FormPage = () => {
                 helperText={errors.inputDescription}
                 required
                 fullWidth
+                autoComplete="off"
               />
             </Box>
           </InputContainer>
@@ -207,6 +237,18 @@ const FormPage = () => {
         </LoaderMessage>
         <CircularProgress color="inherit" />
       </StyledBackdrop>
+
+      <Dialog open={isErrorModalOpen} onClose={handleCloseErrorModal}>
+        <DialogTitle>Error</DialogTitle>
+        <DialogContent>
+          <Typography>{errorMessage}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseErrorModal} color="primary">
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
