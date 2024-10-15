@@ -17,9 +17,6 @@ export const scrapeData = async (req: Request, res: Response) => {
       width: 2000,
       height: 1000,
     })
-    await page.screenshot({
-      path: `ss/00_seminuevos.png`,
-    })
 
     await authenticateToSite({ page })
     await fillOutVehicleForm({ page, vehicle })

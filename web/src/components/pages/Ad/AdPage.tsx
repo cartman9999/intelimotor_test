@@ -1,5 +1,5 @@
-import { Box, Typography } from '@mui/material'
-import { useLocation } from 'react-router-dom'
+import { Box, Button, Typography } from '@mui/material'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Confetti from 'react-confetti'
 import { useEnv } from '../../../context/EnvContext'
 import { useState, useEffect } from 'react'
@@ -40,6 +40,7 @@ const AdPage = () => {
   const { apiUrl } = useEnv()
   const location = useLocation()
   const [showConfetti, setShowConfetti] = useState(true)
+  const navigate = useNavigate()
 
   const queryParams = new URLSearchParams(location.search)
   const imageUrl = queryParams.get('imageUrl') || null
@@ -52,7 +53,17 @@ const AdPage = () => {
   return (
     <Box sx={{ mt: 4, textAlign: 'center' }}>
       {imageUrl && apiUrl && (
-        <Ad showConfetti={showConfetti} imageUrl={imageUrl} apiUrl={apiUrl} />
+        <>
+          <Ad showConfetti={showConfetti} imageUrl={imageUrl} apiUrl={apiUrl} />
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3 }}
+            onClick={() => navigate('/')}
+          >
+            Publicar otro anuncio
+          </Button>
+        </>
       )}
       {!(imageUrl && apiUrl) && <Error />}
     </Box>

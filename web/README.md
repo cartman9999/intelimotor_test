@@ -40,14 +40,14 @@ Para configurar la aplicación es necesario crear un archivo `.env`. Las variabl
 VITE_API_URL= Añadir la URL de la API incluyendo puerto, ejemplo: http://localhost:3000
 ```
 
-`VITE_API_URL` hace referencia a la URL del servidor, debe incluir el número de puerto.
+`VITE_API_URL` hace referencia a la URL del servidor, debe incluir el número de puerto y el prefijo `http://`
 
 ## Iniciar app
 
 Para iniciar la app, es necesario ejecutar el siguiente comando desde la carpeta `/api`:
 
 ```
-npm run start
+npm run dev
 ```
 
 ## Publicar anuncio en seminuevos.com

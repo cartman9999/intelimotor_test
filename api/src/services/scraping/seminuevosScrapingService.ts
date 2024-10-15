@@ -18,19 +18,11 @@ export const authenticateToSite = async ({ page }: { page: Page }) => {
     page.waitForNavigation({ waitUntil: 'networkidle0' }),
   ])
 
-  await page.screenshot({
-    path: `ss/01_login.png`,
-  })
-
   const emailInput = await page.locator('#email')
   await emailInput.fill(`${process.env.SEMINUEVOS_USER}`)
   const passwordInput = await page.locator('#password')
   await passwordInput.fill(`${process.env.SEMINUEVOS_PASSWORD}`)
   const submitBtn = await page.locator('button[type="submit"]')
-
-  await page.screenshot({
-    path: `ss/02_loginForm_filled.png`,
-  })
 
   await Promise.all([
     await submitBtn.click(),
@@ -40,10 +32,6 @@ export const authenticateToSite = async ({ page }: { page: Page }) => {
   console.log('Authenticated succesfully!')
   console.log('Redirecting to home page...')
 
-  await page.screenshot({
-    path: `ss/03_home.png`,
-  })
-
   const vendeTuVehiculoBtn = await page.locator('a.btn-primary')
 
   await Promise.all([
@@ -52,10 +40,6 @@ export const authenticateToSite = async ({ page }: { page: Page }) => {
   ])
 
   console.log('Redirection to home page completed succesfully!')
-
-  await page.screenshot({
-    path: `ss/04_vende_tu_vehiculo.png`,
-  })
 }
 
 const fillSelectDropdownFields = async ({
@@ -133,11 +117,6 @@ const fillTextInputs = async ({
     selector: '#input_precio',
     value: vehicle.price.toString(),
   })
-
-  // Remove
-  await page.screenshot({
-    path: `ss/014_inputs.png`,
-  })
 }
 
 const fillPageOneForm = async ({
@@ -154,9 +133,6 @@ const fillPageOneForm = async ({
   console.log('Vehicle form page 2')
   await clickNextBtn({ page })
   await page.waitForSelector('#input_text_area_review')
-  await page.screenshot({
-    path: `ss/016_step_2.png`,
-  })
   console.log('Vehicle form completed!')
 }
 
@@ -184,10 +160,6 @@ const uploadImages = async ({
 
     await wait(3000)
     console.log('Vehicle images uploaded succesfully!')
-    // REMOVE
-    await page.screenshot({
-      path: `ss/018_images_uploaded.png`,
-    })
   } else {
     throw new Error('Could not find input file. Cannot upload vehicle images')
   }
@@ -207,10 +179,6 @@ const fillPageTwoForm = async ({
     value: vehicle.description,
   })
 
-  await page.screenshot({
-    path: `ss/017_description.png`,
-  })
-
   await uploadImages({ page, vehicle })
   await clickNextBtn({ page })
   await waitForResponse({
@@ -218,9 +186,6 @@ const fillPageTwoForm = async ({
     endpoint: 'api/secure/vehicle/user-publish/publish',
   })
   await page.waitForNavigation({ waitUntil: 'networkidle0' })
-  await page.screenshot({
-    path: `ss/019_tier_selection.png`,
-  })
 }
 
 const clickNextBtn = async ({ page }: { page: Page }) => {
